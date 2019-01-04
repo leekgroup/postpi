@@ -199,7 +199,7 @@ t_IAP_Inf = function(sim_dat_tv_nested){
 #' @keywords provide corrected t statistics from derivation approach
 #' @examples
 #' \dontrun{
-#' t_pstar = Deriv_BC(sim_dat_tv_nested)
+#' table = Deriv_BC(sim_dat_tv_nested,ss)
 #' }
 #' @export
 Deriv_BC = function(sim_dat_tv_nested,ss){
@@ -261,7 +261,7 @@ Deriv_BC = function(sim_dat_tv_nested,ss){
 #' @keywords provide corrected t statistics from bootstrap approach1
 #' @examples
 #' \dontrun{
-#' t_bs_test = BS_test(sim_dat_tv_nested)
+#' table = BS_test(sim_dat_tv_nested,ss)
 #' }
 #' @export
 BS_test = function(sim_dat_tv_nested, ss){
@@ -334,7 +334,7 @@ BS_test = function(sim_dat_tv_nested, ss){
 #' @keywords provide corrected t statistics from bootstrap approach2
 #' @examples
 #' \dontrun{
-#' t_bs_real = BS_test(sim_dat_tv_nested)
+#' table = BS_test(sim_dat_tv_nested,ss)
 #' }
 #' @export
 BS_rel = function(sim_dat_tv_nested, ss){
