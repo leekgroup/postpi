@@ -6,8 +6,8 @@
 #' @import reshape2
 #' @import parallel
 
-#' @title Bias correction in statistical inference after predictions
-#' @description This function is used for simulating outcome and predictors from linear case, then using machine learning method to make predictions to get predicted outcome.
+#' @title Data simulation 
+#' @description This function is used for simulating outcome and predictors from linear case in training, testing, and validation sets. It uses machine learning method in the training set to train the model, and then make predictions in the testing and validation sets to get predicted outcomes.
 #' @param ss data size in each training, testing, and validation set.
 #' @param n_sim number of simulations
 #' @param beta1 coefficient for the first predictor
@@ -76,7 +76,7 @@ iap_sim = function(ss, n_sim, beta1, beta2, beta3, beta4, method){
   return(sim_dat_tv)
 }
 
-#' @title plot relationship between outcome and predictor of interest, and relationship between outcome and predicted outcome
+#' @title elationship plots
 #' @description This function is used for making plots between outcome and predictor of interest, and between outcome and predicted outcome
 #' @param sim_dat_tv simulated data frame from iap_sim(ss, n_sim, beta1, beta2, beta3, beta4, method)
 #' @return
@@ -171,8 +171,8 @@ fit_IAP_Inf = function(sim_dat_tv){
   return(sim_dat_tv_nested)
 }
 
-#' @title get t statistics from inference after prediction model and inference model
-#' @description get t statistics from necessary models
+#' @title Obtain t statistics from inference after prediction model and inference model
+#' @description This function is used to get t statistics from inference after prediction model and inference model
 #' @param sim_dat_tv_nested a nested data frame with model fit statistics from IAP and Inf model
 #' @return
 #'  \item{df}{a data frame with 2 colomns, each colomn with t statistics from IAP and Inf model}
@@ -190,8 +190,8 @@ t_IAP_Inf = function(sim_dat_tv_nested){
   return(df = cbind(sim_dat_val_nested %>% select(t_iap,t) %>% unnest()))
 }
 
-#' @title correct t statistics from derivation approach
-#' @description get corrected t statistics from derivation approach
+#' @title Correct statistics from derivation approach
+#' @description This function is used to calculate corrected statistics from derivation approach and output corrected results into a data frame.
 #' @param sim_dat_tv_nested a nested data frame with model fit statistics from IAP and Inf model
 #' @param ss data size in each training, testing, and validation set.
 #' @return
@@ -252,8 +252,8 @@ Deriv_BC = function(sim_dat_tv_nested,ss){
 
 }
 
-#' @title correct t statistics from bootstrap approach1
-#' @description get corrected t statistics from bootstrap approach: bootstrap from testing set
+#' @title Correct t statistics from bootstrap approach1
+#' @description This function is used to get corrected statistics from bootstrap approach: bootstrap from testing set
 #' @param sim_dat_tv_nested a nested data frame with model fit statistics from IAP and Inf model
 #' @param ss data size in each training, testing, and validation set.
 #' @return
@@ -292,17 +292,18 @@ BS_test = function(sim_dat_tv_nested, ss){
     }))
 
 
-  bs_test_nested = bs_test_nested %>%
+    bs_test_nested = bs_test_nested %>%
     mutate(bias = purrr::map(sim, function(x){
-      beta_iap = .$bs_iap_df[[x]] %>% as.data.frame() %>% select(estimate) %>% apply(.,2,mean)
-      beta = .$bs_df[[x]] %>% as.data.frame() %>% select(estimate) %>% apply(.,2,mean)
+      beta_iap = .$bs_iap_df[[x]][,1] %>% mean()
+      beta = .$bs_df[[x]][,1] %>% mean()
       bias = beta_iap - beta
     }))  %>%
     mutate(sd_scalar = purrr::map(sim, function(x){
-      sd_iap = .$bs_iap_df[[x]] %>% as.data.frame() %>% select(estimate) %>% apply(.,2,sd)
-      sd = .$bs_df[[x]] %>% as.data.frame() %>% select(estimate) %>% apply(.,2,sd)
+      sd_iap = .$bs_iap_df[[x]][,1] %>% sd()
+      sd = .$bs_df[[x]][,1] %>% sd()
       sd_scalar = sd_iap/sd
     }))
+
 
 
   #### correct both beta estimation and se in validation set
@@ -319,14 +320,14 @@ BS_test = function(sim_dat_tv_nested, ss){
   BC_t = bs_val_nested %>% select(t_bs_test) %>% unnest()
   p_val = 2*(1-pt(abs(BC_t[,1]),df=ss-1))
   tidy_table = data.frame(estimate,std_error,BC_t,p_val)
-  colnames(tidy_table) = c("estimate","std error","BC_t","p_val")
+  colnames(tidy_table) = c("estimate","std error","BC t","p value")
 
   return(tidy_table)
 }
 
 
-#' @title correct t statistics from bootstrap approach2
-#' @description get corrected t statistics from bootstrap approach: bootstrap from validation set using relationship model between real and predicted outcome
+#' @title Correct t statistics from bootstrap approach2
+#' @description This function is used to get corrected statistics from bootstrap approach: bootstrap from validation set using relationship model between real and predicted outcome
 #' @param sim_dat_tv_nested a nested data frame with model fit statistics from IAP and Inf model
 #' @param ss data size in each training, testing, and validation set.
 #' @return
@@ -375,13 +376,13 @@ BS_rel = function(sim_dat_tv_nested, ss){
   #### Find t statistics
   bs_val_nested = bs_val_nested %>%
     mutate(beta = purrr::map(sim, function(x){
-      .$bbse_df[[x]][,"estimate"] %>% mean()
+      .$bbse_df[[x]][,1] %>% mean()
     }))  %>%
     mutate(se = purrr::map(sim, function(x){
-      .$bbse_df[[x]][,"std.error"] %>% mean()
+      .$bbse_df[[x]][,2] %>% mean()
     })) %>%
     mutate(t_bs_rel = purrr::map(sim, function(x){
-      .$bbse_df[[x]][,"estimate"] %>% mean() / .$bbse_df[[x]][,"std.error"] %>% mean()
+      .$bbse_df[[x]][,1] %>% mean() / .$bbse_df[[x]][,2] %>% mean()
     }))
 
   estimate = bs_val_nested %>% select(beta) %>% unnest()
@@ -389,7 +390,7 @@ BS_rel = function(sim_dat_tv_nested, ss){
   BC_t = bs_val_nested %>% select(t_bs_rel) %>% unnest()
   p_val = 2*(1-pt(abs(BC_t[,1]),df=ss-1))
   tidy_table = data.frame(estimate,std_error,BC_t,p_val)
-  colnames(tidy_table) = c("estimate","std error","BC_t","p_val")
+  colnames(tidy_table) = c("estimate","std error","t","p value")
 
   return(tidy_table)
 }
