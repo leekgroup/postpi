@@ -12,8 +12,8 @@ ypy_plot(sim_dat_tv)
 sim_dat_tv_nested = fit_IAP_Inf(sim_dat_tv)
 
 t_t_iap = t_IAP_Inf(sim_dat_tv_nested)
-df1 = Deriv_BC(sim_dat_tv_nested)
-df2 = BS_test(sim_dat_tv_nested)
-df3 = BS_rel(sim_dat_tv_nested)
+df1 = Deriv_BC(sim_dat_tv_nested,ss)
+df2 = BS_test(sim_dat_tv_nested,ss)
+df3 = BS_rel(sim_dat_tv_nested,ss)
 
 df1
