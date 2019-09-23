@@ -3,20 +3,21 @@ library(broom)
 library(gam)
 library(caret)
 
-iap_relate <- function(test_dat, outcome_name, prediction_name, method = "knn"){
+iap_relate <- function(yobs, test_dat, method = "knn"){
   
+  yobs  <- deparse(substitute(yobs))
   
-  if (is.numeric(test_dat[ , outcome_name])){
+  if (is.numeric(test_dat[,yobs])){
     
-    ## gam ?
-    rel_model <- lm(as.formula(paste0(outcome_name, " ~ ", prediction_name)), test_dat)
+    ypred  <- colnames(test_dat)[-which(colnames(test_dat) == yobs)]
+    
+    rel_model <- gam(as.formula(paste0(yobs, " ~ ", paste("s(", ypred, ")", collapse = " + "))), data = test_dat)
     
   }else{
     
-    rel_model <- train(as.formula(paste0(outcome_name, " ~ ", prediction_name)), test_dat, method = method)
+    rel_model <- train(as.formula(paste0(yobs, "~ .")), test_dat, method = method)
     
   }
-  
   
   rel_model
   
@@ -32,7 +33,7 @@ iap <- function(inf_formula, valid_dat, rel_model, bs = 100, seed = 1234){
   
   
   ## find outcome and covariate names from the inference formula
-  outcome    <- all.vars(inf_formula)[1]
+  ypred      <- all.vars(inf_formula)[1]
   covariates <- all.vars(inf_formula)[-1]
   
   ## bootstrap data, simulate y outcomes from the relationship model, and fit inference model on simulated data
@@ -42,9 +43,9 @@ iap <- function(inf_formula, valid_dat, rel_model, bs = 100, seed = 1234){
     
     bs_data <- valid_dat[bs_idx,]
     
-    if (is.numeric(valid_dat[ , outcome])){
+    if (is.numeric(valid_dat[ , ypred])){
       
-      sim_y           <- rnorm(ss, mean = predict(rel_model, bs_data), sd = glance(rel_model)$sigma)
+      sim_y           <- rnorm(ss, mean = predict(rel_model, bs_data), sd = sigma(rel_model))
       
       bs_data$sim_y   <- sim_y
       
@@ -134,19 +135,22 @@ iap <- function(inf_formula, valid_dat, rel_model, bs = 100, seed = 1234){
 }
 
 
-iap_der <- function(inf_formula, outcome_name, prediction_name, valid_dat, test_dat){
+iap_der <- function(inf_formula, yobs, ypred, valid_dat, test_dat){
   
-  if (is.numeric(test_dat[ , outcome_name])){
+  obs  <- deparse(substitute(yobs))
+  pred <- deparse(substitute(ypred))
+  
+  if (is.numeric(test_dat[ , obs])){
            
        covariates      <- all.vars(inf_formula)[-1]
        
        ## inference formula for testing data with observed outcome
-       inf_formula_obs <- as.formula(paste(outcome_name, "~", paste(covariates, collapse ="+")))
+       inf_formula_obs <- as.formula(paste(obs, "~", paste(covariates, collapse ="+")))
        
        ## calculate bias on testing set
        bias <- tidy(lm(inf_formula, test_dat))$estimate[-1] - tidy(lm(inf_formula_obs, test_dat))$estimate[-1]
        
-       yp_y <- as.formula(paste0(outcome_name, " ~ ", prediction_name))
+       yp_y <- as.formula(paste0(obs, " ~ ", pred))
        
        ## calculate conditional variance of yp on testing set
        gamma1   <- tidy(lm(yp_y, test_dat))$estimate[-1]
@@ -174,11 +178,11 @@ iap_der <- function(inf_formula, outcome_name, prediction_name, valid_dat, test_
        p.value    <- 2*pt(-abs(statistic), df = nrow(valid_dat) - 1 - length(covariates))
        
        tidytable  <- data.frame(term = covariates, 
-                               estimate = estimate,
-                               std.error = std.error, 
-                               statistic = statistic,
-                               p.value = p.value,
-                               row.names = NULL)
+                                estimate = estimate,
+                                std.error = std.error, 
+                                statistic = statistic,
+                                p.value = p.value,
+                                row.names = NULL)
      }
   
   
@@ -207,26 +211,25 @@ validation <- testing(data_split)
 
 
 ## fit the relationship model on testing set
-rel_model <- iap_relate(testing, "actual", "predictions")
+rel_model <- iap_relate(actual, testing %>% select(actual, predictions))
 
-## set up the inferance formula
-formula <- predictions ~ region_100 
+inf_formula <- predictions ~ region_100
 
 ## fit the inference model on validation set and make iap corrections using bootstrap approach
-results_iap <- iap(formula, validation, rel_model)
+results_iap <- iap(inf_formula , validation, rel_model)
 results_iap
 
 ## fit the inference model on validation set and make iap corrections using derivation approach
-results_der <- iap_der(formula, "actual", "predictions", validation, testing)
+results_der <- iap_der(inf_formula , actual, predictions, validation, testing)
 results_der
 
 
 ## show the inference results on validation set without corrections
-tidy(lm(formula, validation))
+tidy(lm(inf_formula, validation))
 
 ## show the inference results on validation set without corrections using observed outcomes 
 ## This output is only for comparing results. In practice we do not have observed outcomes on validation set.
-tidy(lm(update(formula, actual ~ .), validation))
+tidy(lm(update(inf_formula, actual ~ .), validation))
 
 ####
 ####
@@ -234,13 +237,12 @@ tidy(lm(update(formula, actual ~ .), validation))
 
 ## data cleaning
 TISSUE_data <- readRDS("breast_TISSUE_results.rds")
-colnames(TISSUE_data)[colnames(TISSUE_data) == "Adipose Tissue"] <- "Adipose_predicted_prob"
-colnames(TISSUE_data)[colnames(TISSUE_data) == "Breast"]         <- "Breast_predicted_prob"
+colnames(TISSUE_data)[colnames(TISSUE_data) == "Adipose Tissue"] <- "Adipose_Tissue"
 
 TISSUE_data$predictions <- as.character(TISSUE_data$predictions)
 TISSUE_data$actual      <- as.character(TISSUE_data$actual)
-TISSUE_data[TISSUE_data == "Breast"]         <- 1
-TISSUE_data[TISSUE_data == "Adipose Tissue"] <- 0
+
+TISSUE_data[TISSUE_data == "Adipose Tissue"] <- "Adipose_Tissue"
 
 TISSUE_data$actual      <- as.factor(TISSUE_data$actual)
 TISSUE_data$predictions <- as.factor(TISSUE_data$predictions)
@@ -254,21 +256,23 @@ validation <- testing(data_split)
 
 
 ## fit the relationship model on testing set
-rel_model <- iap_relate(testing, "actual", "Breast_predicted_prob")
+rel_model <- iap_relate(actual, testing %>% select(actual, Adipose_Tissue, Breast))
 
-## set up the inferance formula
-formula = predictions ~  region_100
+inf_formula <- predictions ~  region_200
 
 ## fit the inference model on validation set and make iap corrections using bootstrap approach
-results_iap <- iap(formula, validation, rel_model)
+results_iap <- iap(inf_formula, validation, rel_model)
 results_iap
 
 ## show the inference results on validation set without corrections
-tidy(glm(formula, validation, family = binomial(link = "logit")))
+tidy(glm(inf_formula, validation, family = binomial(link = "logit")))
 
 ## show the inference results on validation set without corrections using observed outcomes 
 ## This output is only for comparing results. In practice we do not have observed outcomes on validation set.
-tidy(glm(update(formula, actual ~ .), validation, family = binomial(link = "logit")))
+tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))
+
+
+
 
 
 
