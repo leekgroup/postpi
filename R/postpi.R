@@ -1,6 +1,9 @@
-#' postpi function
+#' postpi function provides the corrected inference result table using a bootstrap approach for continuous / catigorical outcomes
 #'
-#' This function provides the corrected inference result using a bootstrap approach
+#' This function is required to take in the relationship model from `postpi_relate()`, a validation set, and the inference formula.
+#' Through a bootstrap approach, the function quantifies biases using the relationship model
+#' and then corrects the inference results in the validation set based on the input inference formula.
+#' The default number of bootstrapping is 100 and the seed is 1234. Both parameters can be defined by users.
 #'
 #' @import broom
 #' @import matrixStats
@@ -10,6 +13,10 @@
 #' @param inf_formula inference formula, eg. y ~ x1
 #' @param bs number of bootstrap times. The default value is 100 times.
 #' @param seed seed number
+#'
+#' @return tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
+#'
+#'
 #' @export
 postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
 
@@ -117,7 +124,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
 
 
 
-  return(tidytable)
+  tidytable
 
 }
 

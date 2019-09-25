@@ -17,7 +17,7 @@ postpi_relate(test_dat, yobs, method = "knn")
 rel_model relationship model between observed outcomes and predicted outcomes/probabilities
 }
 \description{
-This function takes in a data set (i.e. testing set) containing only observed and predicted outcomes.
+This function is required to take in a data set (i.e. testing set) containing only observed and predicted outcomes, name for observed outdomes.
 It relates observed and predicted continuous outcomes through a gamma function.
 For categorical outcomes, user inputs observed outcomes and the probabilities of predicted outcomes (i.e. probabilities for each predicted category).
 It related categorical data through a user defined maching learning method from the caret package. The default method is k-nearest neighbours.

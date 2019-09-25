@@ -2,7 +2,7 @@
 % Please edit documentation in R/postpi.R
 \name{postpi}
 \alias{postpi}
-\title{postpi function}
+\title{postpi function provides the corrected inference result table using a bootstrap approach for continuous / catigorical outcomes}
 \usage{
 postpi(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234)
 }
@@ -17,6 +17,12 @@ postpi(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234)
 
 \item{seed}{seed number}
 }
+\value{
+tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
+}
 \description{
-This function provides the corrected inference result using a bootstrap approach
+This function is required to take in the relationship model from `postpi_relate()`, a validation set, and the inference formula.
+Through a bootstrap approach, the function quantifies biases using the relationship model
+and then corrects the inference results in the validation set based on the input inference formula.
+The default number of bootstrapping is 100 and the seed is 1234. Both parameters can be defined by users.
 }
