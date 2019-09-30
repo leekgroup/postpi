@@ -1,0 +1,232 @@
+---
+title: "vignettes for postpi"
+author: "Siruo Wang"
+date: "September 25, 2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{postpi tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+
+---
+
+### Introduction to the package
+
+Many modern problems leverage machine learning methods to predict outcomes based on observable covariates. Subsequent statistical modeling, e.g. to understand population trends in outcomes, often involves treating predicted outcomes as interchangeable with observed data. `postpi` is an R package we developed to correct downstream statistical inference using outcomes predicted with an arbitrary machine learning method. Our package can be applied to both continuous and categorical data. `postpi` contains three functions: 
+
+* `postpi_relate` 
+    + required inputs: a data set (i.e. testing set) containing only observed and predicted outcomes, and column name for observed outcomes.
+    + optional inputs: a method from the [caret](http://topepo.github.io/caret/index.html) package that user defines to relate categorical observed outcome and probablities of predicted categories. The default method set for the function is k-nearest neighbors.
+    + purpose: the function models the relationship between observed outcomes and predicted outcomes/probabilities, and returns the relationship model. 
+
+* `postpi`
+    + required inputs: a data set (i.e. validation set) containing predicted outcomes and covariates, the relationship model estimated from `postpi_relate()`, and an inference formula.
+    + optional inputs: the number of bootstrap times, and a seed number. The default number of bootstrap times is 100 and the default seed number is 1234.
+    + purposes: the function provides the corrected inference result table using a bootstrap approach for continuous/catigorical outcomes. The format of the output is a tidy table with 5 colomns: term, estimate, std.error, statistic, p.value.
+
+* `postpi_der`
+    + required inputs: a testing set containing observed and predicted continuous outcomes, column names for observed and predicted outcomes, a validation set containing predicted outcomes and covariates, and an inference formula.
+    + optional inputs: None.
+    + purposes: the function provides the corrected inference result table using a derivation approach only for continuous outcomes. The format of the output is a tidy table with 5 colomns: term, estimate, std.error, statistic, p.value.
+
+
+### Procedure to use the package
+
+1. Prepare a data set with observed outcomes and predicted outcomes/probabilities for each predicted categories, and covariates of interest for subsequant inferential analyses.
+
+2. Split the data set into testing and validation sets. On testing set, use `postpi_relate()` to estimate a relationship model. 
+
+3. On validation set, use `postpi()`/`postpi_der()` to conduct inferential analyses.
+
+Note: If users have a subset of observed outcomes but no predicted outcomes, they should split the data set into three sets -- training, testing, and validation sets. On training set, use a machine learning method to train a prediction model, and apply it to testing and validation sets to get predicted results. Then users should repeat step 2-3 above to obtain inference results.
+
+
+### Example to use the package on a data set with continuous outcomes.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+devtools::load_all()
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+```
+
+
+In this example, we use a data set `RINdata` available in the package. `RINdata` contains a column of observed RIN values named `actual`, a column of predicted RIN values named `prediction` obtained from a previous trained data set, and 200 columns of gene expression regions. We want to study associations between RINs and gene expression levels. A detailed description of the `RINdata` data set is available at our paper [Post-prediction inference](a link to preprint).
+
+1. We load `RINdata` and split data into testing and validation sets. 
+```{r, message=FALSE}
+data("RINdata")
+data <- RINdata
+
+## split the data into testing and validation sets using rsample package
+set.seed(2019)
+data_split <- rsample::initial_split(data, prop = 1/2)
+testing    <- rsample::training(data_split)
+validation <- rsample::testing(data_split)
+```
+
+
+2. We select the columns of the observed and predicted outcomes from `RINdata`, and pass it to `postpi_relate()` to estimate a relationship model named `rel_model`.
+```{r}
+## fit the relationship model on testing set
+rel_model <- testing %>%
+  select(actual, predictions) %>%
+  postpi_relate(actual)
+```
+
+
+3. We define an inference formula `predictions ~ region_10` that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`.
+```{r}
+inf_formula <- predictions ~ region_10
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi <- validation %>%
+  postpi(rel_model, inf_formula)
+
+```
+
+
+4. We repeat step 3, but now we pass necessary inputs to the inference function `postpi_der`. In `postpi()` we estiamte inference results using a derivation approach and we obtain the results in a tidy table format named `results_der`.
+```{r}
+## fit the inference model on validation set and make iap corrections using derivation approach
+results_der <- testing %>%
+  postpi_der(actual, predictions, validation, inf_formula)
+```
+
+
+5. Now we have the inference results on validation set: `results_postpi` from a bootstrap approach `postpi()`, and `results_der` from a derivation approach. We compare them to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.
+
+```{r}
+results_postpi
+```
+
+```{r}
+results_der
+```
+
+`no correction`
+```{r}
+## show the inference results on validation set without corrections
+broom::tidy(lm(inf_formula, validation))[-1,]
+```
+
+`gold standard`
+```{r}
+## show the inference results on validation set using observed outcomes
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
+```
+
+In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest `region_10` using our methods `results_postpi` and `results_der`, compared to the no correction approach.
+
+
+In the above example, we define the inference model for one covariate of interest as `predictions ~ region_10`. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as `predictions ~ region_10 + region_20 + region_50`. We repeat step 2-5 in above analyses:
+
+```{r}
+## fit the relationship model on testing set
+rel_model <- testing %>%
+  select(actual, predictions) %>%
+  postpi_relate(actual)
+
+inf_formula <- predictions ~ region_10 + region_20 + region_50 
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi <- validation %>%
+  postpi(rel_model, inf_formula)
+
+results_der <- testing %>%
+  postpi_der(actual, predictions, validation, inf_formula)
+
+
+results_postpi
+results_der
+broom::tidy(lm(inf_formula, validation))[-1,]
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
+```
+
+Again, we observe that we obtain more accurate estimates, standard errors, and t-statistics using our methods `results_postpi` and `results_der` compared to the no correction approach.
+
+
+
+### Example to use the package on a data set with categorical outcomes.
+
+In this example, we use a data set `TISSUEdata` available in the package. `TISSUEdata` contains a column of observed tissue types (breast / adipose tissues) named `actual`, a column of predicted tissue types named `predictions`, two columns of the probabilities of each predicted tissue types named `Breast` and `Adipose Tissue` obtained from a previous trained data set, and 2281 columns of gene expression regions. We want to study associations between breast / adipose tissue types and gene expression levels. A detailed description of the `TISSUEdata` data set is available at our paper [Post-prediction inference](a link to preprint).
+
+
+1. We read in data set `TISSUEdata`, clean it and make the class of observed and predicted tissue type columns (`actual` and `predictions`) to be factor. Then we split the clean data set into testing and validation sets. 
+```{r, echo = TRUE}
+data("TISSUEdata")
+TISSUE_data <- TISSUEdata
+
+
+colnames(TISSUE_data)[colnames(TISSUE_data) == "Adipose Tissue"] <- "Adipose_Tissue"
+
+TISSUE_data$predictions <- as.character(TISSUE_data$predictions)
+TISSUE_data$actual      <- as.character(TISSUE_data$actual)
+
+TISSUE_data[TISSUE_data == "Adipose Tissue"] <- "Adipose_Tissue"
+
+TISSUE_data$actual      <- as.factor(TISSUE_data$actual)
+TISSUE_data$predictions <- as.factor(TISSUE_data$predictions)
+
+## split the data into testing and validation sets using rsample package
+set.seed(2019)
+data_split <- rsample::initial_split(TISSUE_data, prop = 1/2)
+testing    <- rsample::training(data_split)
+validation <- rsample::testing(data_split)
+```
+
+
+2. We select the three columns from the data set: one column with the observed tissue types, two columns with the probabilities of the predicted tissue types. We then pass the data subset to `postpi_relate()` to estimate a relationship model between observed outcomes and predicted probabilities named `rel_model`.
+```{r}
+# fit the relationship model on testing set
+rel_model <- testing %>%
+  select(actual, Adipose_Tissue, Breast) %>%
+  postpi_relate(actual)
+```
+
+
+3. We define an inference formula `predictions ~ region_200` that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`. In this example the data set we use contains categorical data, so we use bootstrap approach only.
+```{r}
+inf_formula <- predictions ~ region_200
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi <- validation %>%
+  postpi(rel_model, inf_formula)
+
+results_postpi
+```
+
+
+4. Now we have the inference result `results_postpi` on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.
+
+```{r}
+results_postpi
+```
+
+`no correction`
+```{r}
+## show the inference results on validation set without corrections
+broom::tidy(glm(inf_formula, validation, family = binomial(link = "logit")))[-1,]
+```
+
+`gold standard`
+```{r}
+## show the inference results on validation set using observed outcomes
+broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))[-1,]
+```
+
+In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest `region_200` using our method `results_postpi`, compared to the no correction approach.
+
+
+
+
+
+
+
+
+
