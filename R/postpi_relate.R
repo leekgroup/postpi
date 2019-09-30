@@ -1,7 +1,7 @@
 #'
 #' postpi_relate function models the the relationship between the observed and predicted outcomes.
 #'
-#' This function is required to take in a data set (i.e. testing set) containing only observed and predicted outcomes, name for observed outdomes.
+#' This function is required to take in a data set (i.e. testing set) containing only observed and predicted outcomes and name for observed outcomes.
 #' It relates observed and predicted continuous outcomes through a gamma function.
 #' For categorical outcomes, user inputs observed outcomes and the probabilities of predicted outcomes (i.e. probabilities for each predicted category).
 #' It related categorical data through a user defined maching learning method from the caret package. The default method is k-nearest neighbours.
