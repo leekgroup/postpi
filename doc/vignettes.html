@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Siruo Wang" />
+
+<meta name="date" content="2019-09-25" />
+
+<title>vignettes for postpi</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">vignettes for postpi</h1>
+<h4 class="author">Siruo Wang</h4>
+<h4 class="date">September 25, 2019</h4>
+
+
+
+<div id="introduction-to-the-package" class="section level3">
+<h3>Introduction to the package</h3>
+<p>Many modern problems leverage machine learning methods to predict outcomes based on observable covariates. Subsequent statistical modeling, e.g. to understand population trends in outcomes, often involves treating predicted outcomes as interchangeable with observed data. <code>postpi</code> is an R package we developed to correct downstream statistical inference using outcomes predicted with an arbitrary machine learning method. Our package can be applied to both continuous and categorical data. <code>postpi</code> contains three functions:</p>
+<ul>
+<li><code>postpi_relate</code>
+<ul>
+<li>required inputs: a data set (i.e. testing set) containing only observed and predicted outcomes, and column name for observed outcomes.</li>
+<li>optional inputs: a method from the <a href="http://topepo.github.io/caret/index.html">caret</a> package that user defines to relate categorical observed outcome and probablities of predicted categories. The default method set for the function is k-nearest neighbors.</li>
+<li>purpose: the function models the relationship between observed outcomes and predicted outcomes/probabilities, and returns the relationship model.</li>
+</ul></li>
+<li><code>postpi</code>
+<ul>
+<li>required inputs: a data set (i.e. validation set) containing predicted outcomes and covariates, the relationship model estimated from <code>postpi_relate()</code>, and an inference formula.</li>
+<li>optional inputs: the number of bootstrap times, and a seed number. The default number of bootstrap times is 100 and the default seed number is 1234.</li>
+<li>purposes: the function provides the corrected inference result table using a bootstrap approach for continuous/catigorical outcomes. The format of the output is a tidy table with 5 colomns: term, estimate, std.error, statistic, p.value.</li>
+</ul></li>
+<li><code>postpi_der</code>
+<ul>
+<li>required inputs: a testing set containing observed and predicted continuous outcomes, column names for observed and predicted outcomes, a validation set containing predicted outcomes and covariates, and an inference formula.</li>
+<li>optional inputs: None.</li>
+<li>purposes: the function provides the corrected inference result table using a derivation approach only for continuous outcomes. The format of the output is a tidy table with 5 colomns: term, estimate, std.error, statistic, p.value.</li>
+</ul></li>
+</ul>
+</div>
+<div id="procedure-to-use-the-package" class="section level3">
+<h3>Procedure to use the package</h3>
+<ol style="list-style-type: decimal">
+<li><p>Prepare a data set with observed outcomes and predicted outcomes/probabilities for each predicted categories, and covariates of interest for subsequant inferential analyses.</p></li>
+<li><p>Split the data set into testing and validation sets. On testing set, use <code>postpi_relate()</code> to estimate a relationship model.</p></li>
+<li><p>On validation set, use <code>postpi()</code>/<code>postpi_der()</code> to conduct inferential analyses.</p></li>
+</ol>
+<p>Note: If users have a subset of observed outcomes but no predicted outcomes, they should split the data set into three sets – training, testing, and validation sets. On training set, use a machine learning method to train a prediction model, and apply it to testing and validation sets to get predicted results. Then users should repeat step 2-3 above to obtain inference results.</p>
+</div>
+<div id="example-to-use-the-package-on-a-data-set-with-continuous-outcomes." class="section level3">
+<h3>Example to use the package on a data set with continuous outcomes.</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)</code></pre></div>
+<p>In this example, we use a data set <code>RINdata</code> available in the package. <code>RINdata</code> contains a column of observed RIN values named <code>actual</code>, a column of predicted RIN values named <code>prediction</code> obtained from a previous trained data set, and 200 columns of gene expression regions. We want to study associations between RINs and gene expression levels. A detailed description of the <code>RINdata</code> data set is available at our paper <a href="a%20link%20to%20preprint">Post-prediction inference</a>.</p>
+<ol style="list-style-type: decimal">
+<li>We load <code>RINdata</code> and split data into testing and validation sets.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;RINdata&quot;</span>)
+data &lt;-<span class="st"> </span>RINdata
+
+## split the data into testing and validation sets using rsample package
+<span class="kw">set.seed</span>(<span class="dv">2019</span>)
+data_split &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">initial_split</span>(data, <span class="dt">prop =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">2</span>)
+testing    &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">training</span>(data_split)
+validation &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">testing</span>(data_split)</code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>We select the columns of the observed and predicted outcomes from <code>RINdata</code>, and pass it to <code>postpi_relate()</code> to estimate a relationship model named <code>rel_model</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## fit the relationship model on testing set
+rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(actual, predictions) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi_relate</span>(actual)</code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>We define an inference formula <code>predictions ~ region_10</code> that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inf_formula &lt;-<span class="st"> </span>predictions <span class="op">~</span><span class="st"> </span>region_<span class="dv">10</span>
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)</code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>We repeat step 3, but now we pass necessary inputs to the inference function <code>postpi_der</code>. In <code>postpi()</code> we estiamte inference results using a derivation approach and we obtain the results in a tidy table format named <code>results_der</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## fit the inference model on validation set and make iap corrections using derivation approach
+results_der &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi_der</span>(actual, predictions, validation, inf_formula)</code></pre></div>
+<ol start="5" style="list-style-type: decimal">
+<li>Now we have the inference results on validation set: <code>results_postpi</code> from a bootstrap approach <code>postpi()</code>, and <code>results_der</code> from a derivation approach. We compare them to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_postpi</code></pre></div>
+<pre><code>##        term   estimate  std.error statistic      p.value
+## 1 region_10 -0.1004698 0.02037859 -4.930166 8.781679e-07</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_der</code></pre></div>
+<pre><code>##        term   estimate  std.error statistic      p.value
+## 1 region_10 -0.1102849 0.02328921 -4.735451 2.314022e-06</code></pre>
+<p><code>no correction</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 1 x 5
+##   term      estimate std.error statistic  p.value
+##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 region_10   -0.116    0.0169     -6.87 7.93e-12</code></pre>
+<p><code>gold standard</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set using observed outcomes
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 1 x 5
+##   term      estimate std.error statistic   p.value
+##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 region_10  -0.0818    0.0202     -4.05 0.0000536</code></pre>
+<p>In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest <code>region_10</code> using our methods <code>results_postpi</code> and <code>results_der</code>, compared to the no correction approach.</p>
+<p>In the above example, we define the inference model for one covariate of interest as <code>predictions ~ region_10</code>. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as <code>predictions ~ region_10 + region_20 + region_50</code>. We repeat step 2-5 in above analyses:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## fit the relationship model on testing set
+rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(actual, predictions) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi_relate</span>(actual)
+
+inf_formula &lt;-<span class="st"> </span>predictions <span class="op">~</span><span class="st"> </span>region_<span class="dv">10</span> <span class="op">+</span><span class="st"> </span>region_<span class="dv">20</span> <span class="op">+</span><span class="st"> </span>region_<span class="dv">50</span> 
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)
+
+results_der &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi_der</span>(actual, predictions, validation, inf_formula)
+
+
+results_postpi</code></pre></div>
+<pre><code>##        term    estimate   std.error statistic      p.value
+## 1 region_10 -0.06596017 0.024427573 -2.700234 6.978126e-03
+## 2 region_20  0.04408618 0.007907034  5.575565 2.746030e-08
+## 3 region_50 -0.14492847 0.019116269 -7.581420 4.866691e-14</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_der</code></pre></div>
+<pre><code>##        term    estimate   std.error statistic      p.value
+## 1 region_10 -0.05752283 0.028062518 -2.049810 4.049233e-02
+## 2 region_20  0.04036748 0.009115932  4.428234 9.930131e-06
+## 3 region_50 -0.16378436 0.021978177 -7.452136 1.278051e-13</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 3 x 5
+##   term      estimate std.error statistic  p.value
+##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 region_10  -0.0625   0.0197      -3.17 1.56e- 3
+## 2 region_20   0.0524   0.00641      8.17 5.14e-16
+## 3 region_50  -0.188    0.0155     -12.2  4.02e-33</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 3 x 5
+##   term      estimate std.error statistic  p.value
+##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 region_10  -0.0197   0.0241     -0.821 4.12e- 1
+## 2 region_20   0.0424   0.00781     5.42  6.51e- 8
+## 3 region_50  -0.183    0.0188     -9.72  6.04e-22</code></pre>
+<p>Again, we observe that we obtain more accurate estimates, standard errors, and t-statistics using our methods <code>results_postpi</code> and <code>results_der</code> compared to the no correction approach.</p>
+</div>
+<div id="example-to-use-the-package-on-a-data-set-with-categorical-outcomes." class="section level3">
+<h3>Example to use the package on a data set with categorical outcomes.</h3>
+<p>In this example, we use a data set <code>TISSUEdata</code> available in the package. <code>TISSUEdata</code> contains a column of observed tissue types (breast / adipose tissues) named <code>actual</code>, a column of predicted tissue types named <code>predictions</code>, two columns of the probabilities of each predicted tissue types named <code>Breast</code> and <code>Adipose Tissue</code> obtained from a previous trained data set, and 2281 columns of gene expression regions. We want to study associations between breast / adipose tissue types and gene expression levels. A detailed description of the <code>TISSUEdata</code> data set is available at our paper <a href="a%20link%20to%20preprint">Post-prediction inference</a>.</p>
+<ol style="list-style-type: decimal">
+<li>We read in data set <code>TISSUEdata</code>, clean it and make the class of observed and predicted tissue type columns (<code>actual</code> and <code>predictions</code>) to be factor. Then we split the clean data set into testing and validation sets.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;TISSUEdata&quot;</span>)
+TISSUE_data &lt;-<span class="st"> </span>TISSUEdata
+
+
+<span class="kw">colnames</span>(TISSUE_data)[<span class="kw">colnames</span>(TISSUE_data) <span class="op">==</span><span class="st"> &quot;Adipose Tissue&quot;</span>] &lt;-<span class="st"> &quot;Adipose_Tissue&quot;</span>
+
+TISSUE_data<span class="op">$</span>predictions &lt;-<span class="st"> </span><span class="kw">as.character</span>(TISSUE_data<span class="op">$</span>predictions)
+TISSUE_data<span class="op">$</span>actual      &lt;-<span class="st"> </span><span class="kw">as.character</span>(TISSUE_data<span class="op">$</span>actual)
+
+TISSUE_data[TISSUE_data <span class="op">==</span><span class="st"> &quot;Adipose Tissue&quot;</span>] &lt;-<span class="st"> &quot;Adipose_Tissue&quot;</span>
+
+TISSUE_data<span class="op">$</span>actual      &lt;-<span class="st"> </span><span class="kw">as.factor</span>(TISSUE_data<span class="op">$</span>actual)
+TISSUE_data<span class="op">$</span>predictions &lt;-<span class="st"> </span><span class="kw">as.factor</span>(TISSUE_data<span class="op">$</span>predictions)
+
+## split the data into testing and validation sets using rsample package
+<span class="kw">set.seed</span>(<span class="dv">2019</span>)
+data_split &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">initial_split</span>(TISSUE_data, <span class="dt">prop =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">2</span>)
+testing    &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">training</span>(data_split)
+validation &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">testing</span>(data_split)</code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>We select the three columns from the data set: one column with the observed tissue types, two columns with the probabilities of the predicted tissue types. We then pass the data subset to <code>postpi_relate()</code> to estimate a relationship model between observed outcomes and predicted probabilities named <code>rel_model</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># fit the relationship model on testing set</span>
+rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(actual, Adipose_Tissue, Breast) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi_relate</span>(actual)</code></pre></div>
+<pre><code>## Warning: package 'caret' was built under R version 3.5.3</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Warning: package 'ggplot2' was built under R version 3.5.3</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>We define an inference formula <code>predictions ~ region_200</code> that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>. In this example the data set we use contains categorical data, so we use bootstrap approach only.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inf_formula &lt;-<span class="st"> </span>predictions <span class="op">~</span><span class="st"> </span>region_<span class="dv">200</span>
+
+## fit the inference model on validation set and make iap corrections using bootstrap approach
+results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)
+
+results_postpi</code></pre></div>
+<pre><code>##         term  estimate std.error statistic      p.value
+## 1 region_200 0.8457281 0.2346512  3.604192 0.0004324313</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Now we have the inference result <code>results_postpi</code> on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_postpi</code></pre></div>
+<pre><code>##         term  estimate std.error statistic      p.value
+## 1 region_200 0.8457281 0.2346512  3.604192 0.0004324313</code></pre>
+<p><code>no correction</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(inf_formula, validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 1 x 5
+##   term       estimate std.error statistic     p.value
+##   &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+## 1 region_200     1.06     0.207      5.12 0.000000313</code></pre>
+<p><code>gold standard</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set using observed outcomes
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
+<pre><code>## # A tibble: 1 x 5
+##   term       estimate std.error statistic  p.value
+##   &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 region_200    0.969     0.255      3.80 0.000143</code></pre>
+<p>In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest <code>region_200</code> using our method <code>results_postpi</code>, compared to the no correction approach.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
