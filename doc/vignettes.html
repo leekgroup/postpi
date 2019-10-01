@@ -16,6 +16,7 @@
 
 <title>vignettes for postpi</title>
 
+<script src="data:application/x-javascript;base64,JChkb2N1bWVudCkucmVhZHkoZnVuY3Rpb24oKXsKICAgIGlmICh0eXBlb2YgJCgnW2RhdGEtdG9nZ2xlPSJ0b29sdGlwIl0nKS50b29sdGlwID09PSAnZnVuY3Rpb24nKSB7CiAgICAgICAgJCgnW2RhdGEtdG9nZ2xlPSJ0b29sdGlwIl0nKS50b29sdGlwKCk7CiAgICB9CiAgICBpZiAoJCgnW2RhdGEtdG9nZ2xlPSJwb3BvdmVyIl0nKS5wb3BvdmVyID09PSAnZnVuY3Rpb24nKSB7CiAgICAgICAgJCgnW2RhdGEtdG9nZ2xlPSJwb3BvdmVyIl0nKS5wb3BvdmVyKCk7CiAgICB9Cn0pOwo="></script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -134,7 +135,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="example-to-use-the-package-on-a-data-set-with-continuous-outcomes." class="section level3">
 <h3>Example to use the package on a data set with continuous outcomes.</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(kableExtra)</code></pre></div>
 <p>In this example, we use a data set <code>RINdata</code> available in the package. <code>RINdata</code> contains a column of observed RIN values named <code>actual</code>, a column of predicted RIN values named <code>prediction</code> obtained from a previous trained data set, and 200 columns of gene expression regions. We want to study associations between RINs and gene expression levels. A detailed description of the <code>RINdata</code> data set is available at our paper <a href="a%20link%20to%20preprint">Post-prediction inference</a>.</p>
 <ol style="list-style-type: decimal">
 <li>We load <code>RINdata</code> and split data into testing and validation sets.</li>
@@ -155,7 +157,7 @@ rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">select</span>(actual, predictions) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">postpi_relate</span>(actual)</code></pre></div>
 <ol start="3" style="list-style-type: decimal">
-<li>We define an inference formula <code>predictions ~ region_10</code> that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>.</li>
+<li>We define an inference formula <code>predictions ~ region_10</code> such that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inf_formula &lt;-<span class="st"> </span>predictions <span class="op">~</span><span class="st"> </span>region_<span class="dv">10</span>
 
@@ -169,29 +171,194 @@ results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%<
 results_der &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">postpi_der</span>(actual, predictions, validation, inf_formula)</code></pre></div>
 <ol start="5" style="list-style-type: decimal">
-<li>Now we have the inference results on validation set: <code>results_postpi</code> from a bootstrap approach <code>postpi()</code>, and <code>results_der</code> from a derivation approach. We compare them to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.</li>
+<li>Now we have the inference results on validation set: <code>results_postpi</code> from a bootstrap approach <code>postpi()</code>, and <code>results_der</code> from a derivation approach. We compare them to the <code>no correction</code> approach (i.e. inference results using predicted outcomes), and the <code>gold standard</code> (i.e. inference results using observed outcomes).</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_postpi</code></pre></div>
-<pre><code>##        term   estimate  std.error statistic      p.value
-## 1 region_10 -0.1004698 0.02037859 -4.930166 8.781679e-07</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_der</code></pre></div>
-<pre><code>##        term   estimate  std.error statistic      p.value
-## 1 region_10 -0.1102849 0.02328921 -4.735451 2.314022e-06</code></pre>
-<p><code>no correction</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
-broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 1 x 5
-##   term      estimate std.error statistic  p.value
-##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 region_10   -0.116    0.0169     -6.87 7.93e-12</code></pre>
-<p><code>gold standard</code></p>
+<p>Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes. To better compare results, we highlight the result of standard errors in red color and t-statistics in blue color.</p>
+<p>We first print out the results from the <code>gold standard</code>. We observe that the standard error for the estimate is 0.20 (red) and the t-statistic is -4.05 (blue).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set using observed outcomes
-broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 1 x 5
-##   term      estimate std.error statistic   p.value
-##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 region_10  -0.0818    0.0202     -4.05 0.0000536</code></pre>
-<p>In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest <code>region_10</code> using our methods <code>results_postpi</code> and <code>results_der</code>, compared to the no correction approach.</p>
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.0818374
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0202238
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-4.046594
+</td>
+<td style="text-align:right;">
+5.36e-05
+</td>
+</tr>
+</tbody>
+</table>
+<p>From our bootstrap approach through function <code>postpi()</code> we get the results with standard error 0.020 (red) and t-statistic -4.93 (blue).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(results_postpi) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.1004698
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0203786
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-4.930166
+</td>
+<td style="text-align:right;">
+9e-07
+</td>
+</tr>
+</tbody>
+</table>
+<p>From our derivation approach through function <code>postpi_der()</code> we get the results with standard error 0.023 (red) and t-statistic -4.74 (blue).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(results_der) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.1102849
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0232892
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-4.735451
+</td>
+<td style="text-align:right;">
+2.3e-06
+</td>
+</tr>
+</tbody>
+</table>
+<p>We observe that the standard errors we obtained using our method are very similar to the gold standard, and the t-statistics from our method is also close to the gold standard. However, if we decide to use predicted RINs as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.017 (red), smaller than the gold standard 0.020; the t-statistic is -6.87, with absolute value larger than the gold standard -4.05.</p>
+<p>By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.1159294
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0168645
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-6.87418
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
 <p>In the above example, we define the inference model for one covariate of interest as <code>predictions ~ region_10</code>. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as <code>predictions ~ region_10 + region_20 + region_50</code>. We repeat step 2-5 in above analyses:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## fit the relationship model on testing set
 rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
@@ -205,34 +372,327 @@ results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%<
 <span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)
 
 results_der &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">postpi_der</span>(actual, predictions, validation, inf_formula)
-
-
-results_postpi</code></pre></div>
-<pre><code>##        term    estimate   std.error statistic      p.value
-## 1 region_10 -0.06596017 0.024427573 -2.700234 6.978126e-03
-## 2 region_20  0.04408618 0.007907034  5.575565 2.746030e-08
-## 3 region_50 -0.14492847 0.019116269 -7.581420 4.866691e-14</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_der</code></pre></div>
-<pre><code>##        term    estimate   std.error statistic      p.value
-## 1 region_10 -0.05752283 0.028062518 -2.049810 4.049233e-02
-## 2 region_20  0.04036748 0.009115932  4.428234 9.930131e-06
-## 3 region_50 -0.16378436 0.021978177 -7.452136 1.278051e-13</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 3 x 5
-##   term      estimate std.error statistic  p.value
-##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 region_10  -0.0625   0.0197      -3.17 1.56e- 3
-## 2 region_20   0.0524   0.00641      8.17 5.14e-16
-## 3 region_50  -0.188    0.0155     -12.2  4.02e-33</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 3 x 5
-##   term      estimate std.error statistic  p.value
-##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 region_10  -0.0197   0.0241     -0.821 4.12e- 1
-## 2 region_20   0.0424   0.00781     5.42  6.51e- 8
-## 3 region_50  -0.183    0.0188     -9.72  6.04e-22</code></pre>
-<p>Again, we observe that we obtain more accurate estimates, standard errors, and t-statistics using our methods <code>results_postpi</code> and <code>results_der</code> compared to the no correction approach.</p>
+<span class="st">  </span><span class="kw">postpi_der</span>(actual, predictions, validation, inf_formula)</code></pre></div>
+<p>We print out the results from the <code>gold standard</code>, our method <code>results_postpi</code> and <code>results_der</code>, and the <code>no correction</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## gold standard
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.0197434
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0240504
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-0.8209152
+</td>
+<td style="text-align:right;">
+0.4117768
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_20
+</td>
+<td style="text-align:right;">
+0.0423561
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0078126
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+5.4214824
+</td>
+<td style="text-align:right;">
+0.0000001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_50
+</td>
+<td style="text-align:right;">
+-0.1831706
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0188360
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-9.7245065
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## postpi
+<span class="kw">kable</span>(results_postpi) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.0659602
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0244276
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-2.700234
+</td>
+<td style="text-align:right;">
+0.0069781
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_20
+</td>
+<td style="text-align:right;">
+0.0440862
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0079070
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+5.575565
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_50
+</td>
+<td style="text-align:right;">
+-0.1449285
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0191163
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-7.581420
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## postpi_der
+<span class="kw">kable</span>(results_der) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.0575228
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0280625
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-2.049810
+</td>
+<td style="text-align:right;">
+0.0404923
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_20
+</td>
+<td style="text-align:right;">
+0.0403675
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0091159
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+4.428234
+</td>
+<td style="text-align:right;">
+0.0000099
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_50
+</td>
+<td style="text-align:right;">
+-0.1637844
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0219782
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-7.452136
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## no correction
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_10
+</td>
+<td style="text-align:right;">
+-0.0625164
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0197435
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-3.166438
+</td>
+<td style="text-align:right;">
+0.0015627
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_20
+</td>
+<td style="text-align:right;">
+0.0523681
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0064135
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+8.165238
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+region_50
+</td>
+<td style="text-align:right;">
+-0.1882510
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.0154628
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+-12.174439
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<p>Again, we observe that we obtain more accurate standard errors (red), and t-statistics (blue) using our method <code>results_postpi</code> and <code>results_der</code> compared to the <code>no correction</code> approach.</p>
 </div>
 <div id="example-to-use-the-package-on-a-data-set-with-categorical-outcomes." class="section level3">
 <h3>Example to use the package on a data set with categorical outcomes.</h3>
@@ -271,7 +731,7 @@ rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Warning: package 'ggplot2' was built under R version 3.5.3</code></pre>
 <ol start="3" style="list-style-type: decimal">
-<li>We define an inference formula <code>predictions ~ region_200</code> that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>. In this example the data set we use contains categorical data, so we use bootstrap approach only.</li>
+<li>We define an inference formula <code>predictions ~ region_200</code> such that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>. In this example the data set we use contains categorical data, so we use bootstrap approach only.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inf_formula &lt;-<span class="st"> </span>predictions <span class="op">~</span><span class="st"> </span>region_<span class="dv">200</span>
 
@@ -283,26 +743,103 @@ results_postpi</code></pre></div>
 <pre><code>##         term  estimate std.error statistic      p.value
 ## 1 region_200 0.8457281 0.2346512  3.604192 0.0004324313</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>Now we have the inference result <code>results_postpi</code> on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.</li>
+<li>Now we have the inference result <code>results_postpi</code> on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes).</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_postpi</code></pre></div>
-<pre><code>##         term  estimate std.error statistic      p.value
-## 1 region_200 0.8457281 0.2346512  3.604192 0.0004324313</code></pre>
-<p><code>no correction</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
-broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(inf_formula, validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 1 x 5
-##   term       estimate std.error statistic     p.value
-##   &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
-## 1 region_200     1.06     0.207      5.12 0.000000313</code></pre>
-<p><code>gold standard</code></p>
+<p>Note in practice we don’t have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes. Again we highlight standard errors in red color and t-statistics in blue color.</p>
+<p>We first print out the results from the <code>gold standard</code>. We observe that the standard error for the estimate is 0.25 (red) and the t-statistic is 3.80 (blue).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set using observed outcomes
-broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,]</code></pre></div>
-<pre><code>## # A tibble: 1 x 5
-##   term       estimate std.error statistic  p.value
-##   &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 region_200    0.969     0.255      3.80 0.000143</code></pre>
-<p>In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest <code>region_200</code> using our method <code>results_postpi</code>, compared to the no correction approach.</p>
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(<span class="kw">update</span>(inf_formula, actual <span class="op">~</span><span class="st"> </span>.), validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_200
+</td>
+<td style="text-align:right;">
+0.9685137
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.2546283
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+3.803638
+</td>
+<td style="text-align:right;">
+0.0001426
+</td>
+</tr>
+</tbody>
+</table>
+<p>From our bootstrap approach through function <code>postpi()</code> we get the results with standard error 0.23 (red) and t-statistic 3.60 (blue).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(results_postpi) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_200
+</td>
+<td style="text-align:right;">
+0.8457281
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.2346512
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+3.604192
+</td>
+<td style="text-align:right;">
+0.0004324
+</td>
+</tr>
+</tbody>
+</table>
+<p>We observe that the standard error and t-statistic we obtained using our method are close to the gold standard. However, if we decide to use predicted tissue types as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.20 (red), smaller than the gold standard 0.25; the t-statistic is 5.11, with absolute value larger than the gold standard 3.80.</p>
+<p>By comparing the inference results using our package and the no correction result, again we conclude that our method works well to correct the inference towards the gold standard!</p>
 </div>
 
 

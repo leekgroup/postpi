@@ -5,6 +5,7 @@ devtools::load_all()
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
 library(dplyr)
+library(kableExtra)
 
 ## ---- message=FALSE------------------------------------------------------
 data("RINdata")
@@ -36,18 +37,32 @@ results_der <- testing %>%
   postpi_der(actual, predictions, validation, inf_formula)
 
 ## ------------------------------------------------------------------------
-results_postpi
+## show the inference results on validation set using observed outcomes
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 
 ## ------------------------------------------------------------------------
-results_der
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## ------------------------------------------------------------------------
+kable(results_der) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 
 ## ------------------------------------------------------------------------
 ## show the inference results on validation set without corrections
-broom::tidy(lm(inf_formula, validation))[-1,]
-
-## ------------------------------------------------------------------------
-## show the inference results on validation set using observed outcomes
-broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
+broom::tidy(lm(inf_formula, validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 
 ## ------------------------------------------------------------------------
 ## fit the relationship model on testing set
@@ -65,10 +80,33 @@ results_der <- testing %>%
   postpi_der(actual, predictions, validation, inf_formula)
 
 
-results_postpi
-results_der
-broom::tidy(lm(inf_formula, validation))[-1,]
-broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
+## ------------------------------------------------------------------------
+## gold standard
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## postpi
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## postpi_der
+kable(results_der) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## no correction
+broom::tidy(lm(inf_formula, validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
 
 ## ---- echo = TRUE--------------------------------------------------------
 data("TISSUEdata")
@@ -107,13 +145,16 @@ results_postpi <- validation %>%
 results_postpi
 
 ## ------------------------------------------------------------------------
-results_postpi
-
-## ------------------------------------------------------------------------
-## show the inference results on validation set without corrections
-broom::tidy(glm(inf_formula, validation, family = binomial(link = "logit")))[-1,]
-
-## ------------------------------------------------------------------------
 ## show the inference results on validation set using observed outcomes
-broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))[-1,]
+broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## ------------------------------------------------------------------------
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 

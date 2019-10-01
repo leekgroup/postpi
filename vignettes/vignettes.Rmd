@@ -53,6 +53,7 @@ devtools::load_all()
 
 ```{r, message=FALSE, warning=FALSE}
 library(dplyr)
+library(kableExtra)
 ```
 
 
@@ -80,7 +81,7 @@ rel_model <- testing %>%
 ```
 
 
-3. We define an inference formula `predictions ~ region_10` that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`.
+3. We define an inference formula `predictions ~ region_10` such that we want to relate gene expression levels in region 10 to predicted RINs. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`.
 ```{r}
 inf_formula <- predictions ~ region_10
 
@@ -99,29 +100,49 @@ results_der <- testing %>%
 ```
 
 
-5. Now we have the inference results on validation set: `results_postpi` from a bootstrap approach `postpi()`, and `results_der` from a derivation approach. We compare them to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.
+5. Now we have the inference results on validation set: `results_postpi` from a bootstrap approach `postpi()`, and `results_der` from a derivation approach. We compare them to the `no correction` approach (i.e. inference results using predicted outcomes), and the `gold standard` (i.e. inference results using observed outcomes). 
 
-```{r}
-results_postpi
-```
+Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes. To better compare results, we highlight the result of standard errors in red color and t-statistics in blue color.
 
-```{r}
-results_der
-```
 
-`no correction`
-```{r}
-## show the inference results on validation set without corrections
-broom::tidy(lm(inf_formula, validation))[-1,]
-```
-
-`gold standard`
+We first print out the results from the `gold standard`. We observe that the standard error for the estimate is 0.20 (red) and the t-statistic is -4.05 (blue).
 ```{r}
 ## show the inference results on validation set using observed outcomes
-broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 ```
 
-In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest `region_10` using our methods `results_postpi` and `results_der`, compared to the no correction approach.
+From our bootstrap approach through function `postpi()` we get the results with standard error 0.020 (red) and t-statistic -4.93 (blue).
+```{r}
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+```
+
+From our derivation approach through function `postpi_der()` we get the results with standard error 0.023 (red) and t-statistic -4.74 (blue).
+```{r}
+kable(results_der) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+```
+We observe that the standard errors we obtained using our method are very similar to the gold standard, and the t-statistics from our method is also close to the gold standard. However, if we decide to use predicted RINs as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.017 (red), smaller than the gold standard 0.020; the t-statistic is -6.87, with absolute value larger than the gold standard -4.05. 
+
+By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!
+```{r}
+## show the inference results on validation set without corrections
+broom::tidy(lm(inf_formula, validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+```
+
+
 
 
 In the above example, we define the inference model for one covariate of interest as `predictions ~ region_10`. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as `predictions ~ region_10 + region_20 + region_50`. We repeat step 2-5 in above analyses:
@@ -141,14 +162,40 @@ results_postpi <- validation %>%
 results_der <- testing %>%
   postpi_der(actual, predictions, validation, inf_formula)
 
-
-results_postpi
-results_der
-broom::tidy(lm(inf_formula, validation))[-1,]
-broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,]
 ```
 
-Again, we observe that we obtain more accurate estimates, standard errors, and t-statistics using our methods `results_postpi` and `results_der` compared to the no correction approach.
+
+We print out the results from the `gold standard`, our method `results_postpi` and `results_der`, and the `no correction`.
+```{r}
+## gold standard
+broom::tidy(lm(update(inf_formula, actual ~ .), validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## postpi
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## postpi_der
+kable(results_der) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## no correction
+broom::tidy(lm(inf_formula, validation))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+```
+
+Again, we observe that we obtain more accurate standard errors (red), and t-statistics (blue) using our method `results_postpi` and `results_der` compared to the `no correction` approach.
 
 
 
@@ -190,7 +237,7 @@ rel_model <- testing %>%
 ```
 
 
-3. We define an inference formula `predictions ~ region_200` that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`. In this example the data set we use contains categorical data, so we use bootstrap approach only.
+3. We define an inference formula `predictions ~ region_200` such that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model `rel_model` estimated above to the inference function `postpi()`. In `postpi()` we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named `results_postpi`. In this example the data set we use contains categorical data, so we use bootstrap approach only.
 ```{r}
 inf_formula <- predictions ~ region_200
 
@@ -202,25 +249,32 @@ results_postpi
 ```
 
 
-4. Now we have the inference result `results_postpi` on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes.
+4. Now we have the inference result `results_postpi` on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes). 
 
-```{r}
-results_postpi
-```
+Note in practice we don't have observed outcomes for all samples so we perform inferences on predicted outcomes. In this example, we reserved the observed outcomes on validation set only for comparison purposes. Again we highlight standard errors in red color and t-statistics in blue color.
 
-`no correction`
-```{r}
-## show the inference results on validation set without corrections
-broom::tidy(glm(inf_formula, validation, family = binomial(link = "logit")))[-1,]
-```
-
-`gold standard`
+We first print out the results from the `gold standard`. We observe that the standard error for the estimate is 0.25 (red) and the t-statistic is 3.80 (blue).
 ```{r}
 ## show the inference results on validation set using observed outcomes
-broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))[-1,]
+broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(link = "logit")))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
 ```
 
-In conclusion, we observe that we obtain more accurate estimate, standard error, and t-statistic for the covariate of interest `region_200` using our method `results_postpi`, compared to the no correction approach.
+From our bootstrap approach through function `postpi()` we get the results with standard error 0.23 (red) and t-statistic 3.60 (blue).
+```{r}
+kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+```
+
+
+We observe that the standard error and t-statistic we obtained using our method are close to the gold standard. However, if we decide to use predicted tissue types as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.20 (red), smaller than the gold standard 0.25; the t-statistic is 5.11, with absolute value larger than the gold standard 3.80. 
+
+By comparing the inference results using our package and the no correction result, again we conclude that our method works well to correct the inference towards the gold standard!
 
 
 
