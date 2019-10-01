@@ -15,7 +15,7 @@ Package can be loaded into R as follows:
 
 ### How to use (for continuous and categorical data)
 
-We provide detailed instructions on how to use our package with examples in the  [vignettes](https://github.com/SiruoWang/postpi/blob/master/vignettes/vignettes.Rmd)
+We provide detailed instructions on how to use our package with examples in the  [vignettes](http://www.siruowang.com/postpi/doc/vignettes.html)
 
 ### Contact
 Siruo Wang: swang171@jhu.edu
