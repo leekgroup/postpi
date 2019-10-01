@@ -57,9 +57,9 @@ Package can be loaded into R as follows:
     library('postpi')
 
 
-### How to use (for continuous and categorical data)
+### Example on how to use our package
 
-In this section, we include a simple example to use the package on a data set with continuous outcomes. We also provide a detailed tutorial on how to use our package with multiple examples in the  [vignettes](http://www.siruowang.com/postpi/doc/vignettes.html).
+In this section, we include a simple example to use the package on a data set with continuous outcomes. We also provide a detailed tutorial on how to use our package with multiple examples on both continuous and categorical data in the  [vignettes](http://www.siruowang.com/postpi/doc/vignettes.html).
 
 
 In this example, we use a data set `RINdata` available in the package. `RINdata` contains a column of observed RIN values named `actual`, a column of predicted RIN values named `prediction` obtained from a previous trained data set, and 200 columns of gene expression regions. We want to study associations between RINs and gene expression levels. A detailed description of the `RINdata` data set is available at our paper [Post-prediction inference](a link to preprint).
