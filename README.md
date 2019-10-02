@@ -1,23 +1,23 @@
-### postpi: Post-prediction Inference
+## postpi: Post-prediction Inference
 
 ### Overview
 
 
-Many modern problems leverage machine learning methods to predict outcomes based on observable covariates. However, in the subsequent statistical modeling, e.g. to understand population trends in outcomes, often involves treating predicted outcomes as interchangeable with observed outcomes. `postpi` is an R package we developed to correct downstream statistical inference using outcomes predicted with an arbitrary machine learning method. 
+Many modern problems leverage machine learning methods to predict outcomes based on observable covariates. In the subsequent statistical modeling, e.g. to understand population trends in outcomes, often involves treating predicted outcomes as interchangeable with observed outcomes. This leads to biases in the downstream inference results due to the reason that machine learning models capture the mean function well but not the variance. `postpi` is an R package we developed to correct such biases in the downstream inferential analyses using outcomes predicted with an arbitrary machine learning method. 
 
-For example, if we want to study association between outcome vector y and covariate of interest \(x_k\), we can fit a simple regression model and estimate \(\beta_1\): 
+For example, if we want to study associations between a phenotype of interest and expression for gene k, we can fit a simple regression model between the outcome vector ![](image/y.gif) and the covariate of interest ![](image/X_k.gif), and we then estimate the coefficient ![](image/beta_1.gif): 
 ![Inference model using observed outcome y](image/observed_inf_model.png)
 
-However, since we do not always observe outcomes for all samples, we often predict outcomes using known covariates from a machine learning tool. Then predicted outcomes from complicated prediction models become inputs into subsequent statistical analyses as:
+However, since we do not always observe outcomes for all samples, we often predict outcomes using observable covariates from a machine learning tool. Then predicted outcomes from complicated prediction models become inputs into subsequent statistical analyses as:
 ![Inference model using predicted outcome y](image/predicted_inf_model.png)
 
-Then we estimate \({\beta^*}_1\) and conduct hypothesis testing as if \({\beta^*}_1\) contains the same property of \(\beta_1\) -- this is not true! Interchanging predicted outcomes as observed outcomes in the subsequent inference model causes problems. 
+Then we estimate ![](image/beta_star_1.gif) and conduct hypothesis testing as if ![](image/beta_star_1.gif) contains the same property of ![](image/beta_1.gif) -- this is not true! Interchanging predicted outcomes as observed outcomes in the subsequent inference model causes problems. 
 
-Let's further examine the problem by plotting observed outcomes Y (grey color) and predicted outcomes \(Y_p\) (blue color) against a covariate of interest X from a simulated example:
+Let's further examine the problem by plotting observed outcomes (grey color) and predicted outcomes (blue color) against a covariate of interest X from a simulated example:
 
 ![ ](image/problem_caused.png)
 
-From the plot, we observe the problem -- standard errors of the estimate \({\beta^*}_1\) using predicted outcomes are much smaller than the standard errors of the estimate \(\beta_1\) using observed outcomes. Reduced standard errors further lead to larger test statistics when conducting hypothesis testings for the estimates and therefore cause more false positives.
+From the plot, we observe the problem -- standard errors of the estimate ![](image/beta_star_1.gif) using predicted outcomes are much smaller than the standard errors of the estimate ![](image/beta_1.gif) using observed outcomes. Reduced standard errors lead to larger test statistics when conducting hypothesis testings for the estimates and therefore further lead to more false positives in the analyses.
 
 Now our package `postpi` becomes handy to correct such biases in the estimates, standard errors and test statistics for both continuous and categorical data. `postpi` contains three functions: 
 
