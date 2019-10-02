@@ -142,7 +142,6 @@ inf_formula <- predictions ~ region_200
 results_postpi <- validation %>%
   postpi(rel_model, inf_formula)
 
-results_postpi
 
 ## ------------------------------------------------------------------------
 ## show the inference results on validation set using observed outcomes
@@ -154,6 +153,14 @@ broom::tidy(glm(update(inf_formula, actual ~ .), validation, family = binomial(l
 
 ## ------------------------------------------------------------------------
 kable(results_postpi) %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+
+## ------------------------------------------------------------------------
+## show the inference results on validation set without corrections
+broom::tidy(glm(inf_formula, validation, family = binomial(link = "logit")))[-1,] %>%
+  kable() %>%
   kable_styling("striped", full_width = F) %>%
   column_spec(3, bold = T, color = "red") %>%
   column_spec(4, bold = T, color = "blue")

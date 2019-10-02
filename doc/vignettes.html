@@ -312,7 +312,6 @@ region_10
 </tbody>
 </table>
 <p>We observe that the standard errors we obtained using our method are very similar to the gold standard, and the t-statistics from our method is also close to the gold standard. However, if we decide to use predicted RINs as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.017 (red), smaller than the gold standard 0.020; the t-statistic is -6.87, with absolute value larger than the gold standard -4.05.</p>
-<p>By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
 broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">lm</span>(inf_formula, validation))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
@@ -359,6 +358,7 @@ region_10
 </tr>
 </tbody>
 </table>
+<p>By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!</p>
 <p>In the above example, we define the inference model for one covariate of interest as <code>predictions ~ region_10</code>. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as <code>predictions ~ region_10 + region_20 + region_50</code>. We repeat step 2-5 in above analyses:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## fit the relationship model on testing set
 rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
@@ -737,11 +737,7 @@ rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
 
 ## fit the inference model on validation set and make iap corrections using bootstrap approach
 results_postpi &lt;-<span class="st"> </span>validation <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)
-
-results_postpi</code></pre></div>
-<pre><code>##         term  estimate std.error statistic      p.value
-## 1 region_200 0.8457281 0.2346512  3.604192 0.0004324313</code></pre>
+<span class="st">  </span><span class="kw">postpi</span>(rel_model, inf_formula)</code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li>Now we have the inference result <code>results_postpi</code> on validation set from a bootstrap approach. We compare it to the no correction approach (i.e. inference results using predicted outcomes), and the gold standard (i.e. inference results using observed outcomes).</li>
 </ol>
@@ -839,6 +835,52 @@ region_200
 </tbody>
 </table>
 <p>We observe that the standard error and t-statistic we obtained using our method are close to the gold standard. However, if we decide to use predicted tissue types as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.20 (red), smaller than the gold standard 0.25; the t-statistic is 5.11, with absolute value larger than the gold standard 3.80.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## show the inference results on validation set without corrections
+broom<span class="op">::</span><span class="kw">tidy</span>(<span class="kw">glm</span>(inf_formula, validation, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>)))[<span class="op">-</span><span class="dv">1</span>,] <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">kable_styling</span>(<span class="st">&quot;striped&quot;</span>, <span class="dt">full_width =</span> F) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">3</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_spec</span>(<span class="dv">4</span>, <span class="dt">bold =</span> T, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>)</code></pre></div>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+region_200
+</td>
+<td style="text-align:right;">
+1.060776
+</td>
+<td style="text-align:right;font-weight: bold;color: red !important;">
+0.207377
+</td>
+<td style="text-align:right;font-weight: bold;color: blue !important;">
+5.115207
+</td>
+<td style="text-align:right;">
+3e-07
+</td>
+</tr>
+</tbody>
+</table>
 <p>By comparing the inference results using our package and the no correction result, again we conclude that our method works well to correct the inference towards the gold standard!</p>
 </div>
 

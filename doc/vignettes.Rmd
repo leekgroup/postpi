@@ -132,7 +132,6 @@ kable(results_der) %>%
 ```
 We observe that the standard errors we obtained using our method are very similar to the gold standard, and the t-statistics from our method is also close to the gold standard. However, if we decide to use predicted RINs as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.017 (red), smaller than the gold standard 0.020; the t-statistic is -6.87, with absolute value larger than the gold standard -4.05. 
 
-By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!
 ```{r}
 ## show the inference results on validation set without corrections
 broom::tidy(lm(inf_formula, validation))[-1,] %>%
@@ -141,8 +140,7 @@ broom::tidy(lm(inf_formula, validation))[-1,] %>%
   column_spec(3, bold = T, color = "red") %>%
   column_spec(4, bold = T, color = "blue")
 ```
-
-
+By comparing the inference results using our package and the no correction result, we conclude that our method works well to correct the inference towards the gold standard!
 
 
 In the above example, we define the inference model for one covariate of interest as `predictions ~ region_10`. Our method can also be applied to correct inferences for a covariate adjusting for other covariates. For example, we define an inference model as `predictions ~ region_10 + region_20 + region_50`. We repeat step 2-5 in above analyses:
@@ -245,7 +243,6 @@ inf_formula <- predictions ~ region_200
 results_postpi <- validation %>%
   postpi(rel_model, inf_formula)
 
-results_postpi
 ```
 
 
@@ -273,6 +270,15 @@ kable(results_postpi) %>%
 
 
 We observe that the standard error and t-statistic we obtained using our method are close to the gold standard. However, if we decide to use predicted tissue types as the outcome variable directly in the subsequant inference analyses and with no corrections to the model estimates, we obtain the following results: the standard error is 0.20 (red), smaller than the gold standard 0.25; the t-statistic is 5.11, with absolute value larger than the gold standard 3.80. 
+
+```{r}
+## show the inference results on validation set without corrections
+broom::tidy(glm(inf_formula, validation, family = binomial(link = "logit")))[-1,] %>%
+  kable() %>%
+  kable_styling("striped", full_width = F) %>%
+  column_spec(3, bold = T, color = "red") %>%
+  column_spec(4, bold = T, color = "blue")
+```
 
 By comparing the inference results using our package and the no correction result, again we conclude that our method works well to correct the inference towards the gold standard!
 
