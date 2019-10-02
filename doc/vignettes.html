@@ -726,10 +726,6 @@ validation &lt;-<span class="st"> </span>rsample<span class="op">::</span><span 
 rel_model &lt;-<span class="st"> </span>testing <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">select</span>(actual, Adipose_Tissue, Breast) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">postpi_relate</span>(actual)</code></pre></div>
-<pre><code>## Warning: package 'caret' was built under R version 3.5.3</code></pre>
-<pre><code>## Loading required package: lattice</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
-<pre><code>## Warning: package 'ggplot2' was built under R version 3.5.3</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>We define an inference formula <code>predictions ~ region_200</code> such that we want to relate gene expression levels in region 200 to predicted tissue types. Then we pass in the validation set, the defined inference formula, and the relationship model <code>rel_model</code> estimated above to the inference function <code>postpi()</code>. In <code>postpi()</code> we estiamte inference results using a bootstrap approach and we obtain the results in a tidy table format named <code>results_postpi</code>. In this example the data set we use contains categorical data, so we use bootstrap approach only.</li>
 </ol>
