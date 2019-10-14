@@ -49,8 +49,6 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
 
     }else{
 
-      #sim_y = rbinom(ss, 1, prob=predict(rel_model, bs_data, type = "prob")[,2])
-
       prob  <- predict(rel_model, bs_data, type = "prob")
 
       sim_y <- unlist(lapply(1:nrow(prob), function(x) {
@@ -68,39 +66,46 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
       sim_inf_table   <- tidy(suppressWarnings(glm(sim_inf_formula, bs_data, family = binomial(link = "logit"))))
     }
 
+    if (all(sapply(data.frame(validation[,covariates]),class) == "numeric")){
+      term      <- sim_inf_table$term[-1]
+
+      estimate  <- sim_inf_table$estimate[-1]
+
+      std.error <- sim_inf_table$std.error[-1]
 
 
-    term      <- sim_inf_table$term[-1]
+      ## check whether any covariate contains all 0s and don't have the inference results when fitting the inference model
+      match_cov <- match(covariates,sim_inf_table$term[-1])
 
-    estimate  <- sim_inf_table$estimate[-1]
+      if (anyNA(match_cov)){
 
-    std.error <- sim_inf_table$std.error[-1]
+        na_cov   <- covariates[which(is.na(match_cov))]
 
-    ## check whether any covariate contains all 0s and don't have the inference results when fitting the inference model
-    match_cov <- match(covariates,sim_inf_table$term[-1])
+        term     <- c(term, na_cov)
 
-    if (anyNA(match_cov)){
+        estimate <- c(estimate, rep(NA, length(na_cov)))
 
-      na_cov   <- covariates[which(is.na(match_cov))]
+        std.error<- c(std.error, rep(NA, length(na_cov)))
 
-      term     <- c(term, na_cov)
+      }
 
-      estimate <- c(estimate, rep(NA, length(na_cov)))
+      sim_table <- data.frame(term, estimate, std.error)
 
-      std.error<- c(std.error, rep(NA, length(na_cov)))
+      sim_table <- sim_table[match(covariates, sim_table$term),]
 
+    } else {
+      sim_table <- sim_inf_table[-1,]
     }
 
-    sim_table <- data.frame(term, estimate, std.error)
 
-    sim_table <- sim_table[match(covariates, sim_table$term),]
+    sim_table
 
 
   }) ## end lapply
 
 
   ## calculate medians to each covariate's estimate, standeard error over bootstrap procedures
-  table_temp <- lapply(1:length(covariates), function(cov){
+  table_temp <- lapply(1:nrow(table_list[[1]]), function(cov){
 
     rowMedians(sapply(table_list, function(x) as.numeric(x[cov,-1])),
                na.rm = TRUE)
@@ -108,7 +113,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
   })
 
   ## create a tidy table similar to broom output with term, estimate, std.error, p.value
-  tidytable           <- data.frame(cbind(covariates, do.call(rbind,table_temp)))
+  tidytable           <- data.frame(cbind(as.character(table_list[[1]]$term), do.call(rbind,table_temp)))[1:3]
 
   colnames(tidytable) <- c("term", "estimate", "std.error")
 
