@@ -66,7 +66,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
       sim_inf_table   <- tidy(suppressWarnings(glm(sim_inf_formula, bs_data, family = binomial(link = "logit"))))
     }
 
-    if (all(sapply(data.frame(validation[,covariates]),class) == "numeric")){
+    if (all(sapply(data.frame(valid_dat[,covariates]),class) == "numeric")){
       term      <- sim_inf_table$term[-1]
 
       estimate  <- sim_inf_table$estimate[-1]
