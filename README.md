@@ -94,7 +94,7 @@ In this example, we use a data set `RINdata` available in the package. `RINdata`
                       postpi(rel_model, inf_formula)
     ```
 
-We compare the inference results using our package to the gold standard and the no correction approach & include more examples in the [vignettes](http://www.siruowang.com/postpi/doc/vignettes.html).
+We compare the inference results using our package to the gold standard and the no correction approach & include more examples in the [vignettes](http://leekgroup.github.io/postpi/doc/vignettes.html).
 
 
 ### Contact
