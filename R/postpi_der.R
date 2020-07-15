@@ -10,7 +10,7 @@
 #' @param yobs name of the continuous observed outcome
 #' @param ypred name of the continuous predicted outcome
 #' @param valid_dat validation set that contains predicted outcomes and covariates
-#' @param inf_formula inference formula, eg. y ~ x1
+#' @param inf_formula inference formula for fitting predicted outcomes ~ covariates, eg. yp ~ x1
 #'
 #'
 #' @return tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
@@ -26,44 +26,47 @@ postpi_der <- function(test_dat, yobs, ypred, valid_dat, inf_formula){
 
     covariates      <- all.vars(inf_formula)[-1]
 
-    ## inference formula for testing data with observed outcome
-    inf_formula_obs <- as.formula(paste(obs, "~", paste(covariates, collapse ="+")))
+    y_x <- as.formula(paste(obs, "~", paste(covariates, collapse ="+")))
 
-    ## calculate bias on testing set
-    bias <- tidy(lm(inf_formula, test_dat))$estimate[-1] - tidy(lm(inf_formula_obs, test_dat))$estimate[-1]
+    yp_x <- inf_formula
 
-    yp_y <- as.formula(paste0(obs, " ~ ", pred))
+    y_yp <- as.formula(paste0(obs, " ~ ", pred))
 
     ## calculate conditional variance of yp on testing set
-    gamma1   <- tidy(lm(yp_y, test_dat))$estimate[-1]
+    gamma1   <- tidy(lm(y_yp, test_dat))$estimate[-1]
 
-    sigma_p  <- glance(lm(yp_y, test_dat))$sigma
+    sigma_rel  <- sigma(lm(y_yp, test_dat))
 
-    sigma_y  <- glance(lm(inf_formula, test_dat))$sigma
-
-    cond_var <- sigma_p + gamma1^2 * sigma_y
+    sigma_yp_x  <- sigma(lm(yp_x, valid_dat))
 
 
-    ## derivation correction of iap estimate on validation set
-    estimate <- tidy(lm(inf_formula, valid_dat))$estimate[-1] - bias
+    inf_factor <- sigma_rel^2 + gamma1^2 * (sigma_yp_x^2)
 
-    ## derivation correction of iap standard error on validation set
-    design_matrix <- cbind(rep(1, nrow(valid_dat)), valid_dat[, covariates])  %>% as.matrix()
+    mod_matrix <- cbind(rep(1, nrow(valid_dat)), valid_dat[, covariates])  %>% as.matrix()
 
-    var_matrix    <- solve(t(design_matrix) %*% design_matrix) * cond_var
+    ## derived adjusted std.error
+    der_se <- sqrt(diag(solve(t(mod_matrix) %*% mod_matrix)*inf_factor))[-1]
 
-    std.error     <- sqrt(diag(var_matrix)[-1])
 
-    ## calcute t-statistic and p-value
-    statistic  <- estimate/std.error
+    ## derived adjusted beta
+    beta_yp_x <- tidy(lm(yp_x, valid_dat)) %>% pull(estimate)
+    beta_yp_x <- beta_yp_x[-1]
 
-    p.value    <- 2*pt(-abs(statistic), df = nrow(valid_dat) - 1 - length(covariates))
+    der_beta <- gamma1 * beta_yp_x
+
+    ## derived t-statistic
+    der_t <- der_beta / der_se
+
+    ## derived p-val
+    der_p <- 2*pt(-abs(der_t), df = nrow(valid_dat) - 1 - length(covariates))
+
+
 
     tidytable  <- data.frame(term = covariates,
-                             estimate = estimate,
-                             std.error = std.error,
-                             statistic = statistic,
-                             p.value = p.value,
+                             estimate = der_beta,
+                             std.error = der_se,
+                             statistic = der_t,
+                             p.value = der_p,
                              row.names = NULL)
   }
 
