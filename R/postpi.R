@@ -10,15 +10,16 @@
 #'
 #' @param valid_dat validation set that contains predicted outcomes and covariates
 #' @param rel_model model object created by `postpi_relate()`
-#' @param inf_formula inference formula, eg. y ~ x1
+#' @param inf_formula inference formula for fitting predicted outcomes ~ covariates, eg. yp ~ x1
+#' @param method parametric or non-parametric method to estimate standard error of estimates. Method = "par" or "non-par". The default value is "par", parametric method.
 #' @param bs number of bootstrap times. The default value is 100 times.
-#' @param seed seed number
+#' @param seed seed number. The default value is 1234
 #'
 #' @return tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
 #'
 #'
 #' @export
-postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
+postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, seed = 1234){
 
   set.seed(seed)
 
@@ -101,25 +102,46 @@ postpi <- function(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234){
     sim_table
 
 
-  }) ## end lapply
+  }) ## end table_list
 
 
+  ## parametric method
   ## calculate medians to each covariate's estimate, standeard error over bootstrap procedures
-  table_temp <- lapply(1:nrow(table_list[[1]]), function(cov){
+  para_table <- lapply(1:nrow(table_list[[1]]), function(cov){
 
     rowMedians(sapply(table_list, function(x) as.numeric(x[cov,-1])),
                na.rm = TRUE)
 
   })
 
+
+  ## non-parametric method
+  non_para_table <- lapply(1:nrow(table_list[[1]]), function(cov){
+
+    sd(sapply(table_list, function(x) as.numeric(x[cov,"estimate"])),na.rm = TRUE)
+
+  })
+
+
+  if (method == "par"){
+
+    std.error <- do.call(rbind, para_table)[,2]
+
+  }else if (method == "non-par"){
+
+    std.error <- do.call(rbind, non_para_table)
+
+  }else {
+    print("method input 'par' or 'non-par' ")
+    break
+  }
+
+  term <- as.character(table_list[[1]]$term)
+  estimate <- do.call(rbind, para_table)[,1] %>% as.character() %>% as.numeric()
+  std.error <- std.error %>% as.character() %>% as.numeric()
+
   ## create a tidy table similar to broom output with term, estimate, std.error, p.value
-  tidytable           <- data.frame(cbind(as.character(table_list[[1]]$term), do.call(rbind,table_temp)))[1:3]
-
-  colnames(tidytable) <- c("term", "estimate", "std.error")
-
-  tidytable$estimate  <- as.numeric(as.character(tidytable$estimate))
-
-  tidytable$std.error <- as.numeric(as.character(tidytable$std.error))
+  tidytable           <- data.frame(term = term, estimate = estimate, std.error = std.error)
 
   tidytable           <- na.omit(tidytable)
 
