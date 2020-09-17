@@ -17,8 +17,19 @@
 #'
 #' @return tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
 #'
-#'
 #' @export
+#' @examples
+#' load("./data/RINdata.RData")
+#'
+#' testing    <- RINdata[1:2000,]
+#' validation <- RINdata[2001:nrow(RINdata),]
+#'
+#' relation_dat   <- data.frame(actual = testing$actual, predictions = testing$predictions)
+#' relation_model <- postpi_relate(relation_dat,actual)
+#'
+#' inf_par    <- postpi(validation, relation_model, predictions ~ region_1)
+#' inf_nonpar <- postpi(validation, relation_model, predictions ~ region_1, method = "non-par")
+#'
 postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, seed = 1234){
 
   set.seed(seed)
@@ -38,7 +49,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, 
 
     bs_data <- valid_dat[bs_idx,]
 
-    if (is.numeric(valid_dat[ , ypred])){
+    if (is.numeric(valid_dat[, ypred])){
 
       sim_y           <- rnorm(ss, mean = predict(rel_model, bs_data), sd = sigma(rel_model))
 

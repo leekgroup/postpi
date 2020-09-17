@@ -4,10 +4,10 @@
 \alias{postpi_relate}
 \title{postpi_relate function models the the relationship between the observed and predicted outcomes.}
 \usage{
-postpi_relate(test_dat, yobs, method = "knn")
+postpi_relate(relation_dat, yobs, method = "knn")
 }
 \arguments{
-\item{test_dat}{testing set that contains observed outcomes and predicted outcomes (continuous data) or probabilities of predicted outcomes (categorical data)}
+\item{relation_dat}{testing set that contains observed outcomes and predicted outcomes (continuous data) or probabilities of predicted outcomes (categorical data)}
 
 \item{yobs}{name of the observed outcome in the testing set}
 
@@ -17,8 +17,16 @@ postpi_relate(test_dat, yobs, method = "knn")
 rel_model relationship model between observed outcomes and predicted outcomes/probabilities
 }
 \description{
-This function is required to take in a data set (i.e. testing set) containing only observed and predicted outcomes, name for observed outdomes.
+This function is required to take in a data set (i.e. testing set) containing only observed and predicted outcomes and name for observed outcomes.
 It relates observed and predicted continuous outcomes through a gamma function.
 For categorical outcomes, user inputs observed outcomes and the probabilities of predicted outcomes (i.e. probabilities for each predicted category).
 It related categorical data through a user defined maching learning method from the caret package. The default method is k-nearest neighbours.
+}
+\examples{
+load("./data/RINdata.RData")
+
+testing    <- RINdata[1:2000,]
+relation_dat   <- data.frame(actual = testing$actual, pred = testing$predictions)
+relation_model <- postpi_relate(relation_dat,actual)
+
 }

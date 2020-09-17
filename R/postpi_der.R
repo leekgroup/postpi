@@ -6,7 +6,7 @@
 #' and then corrects the inference results in the validation set based on the input inference formula
 #'
 #'
-#' @param test_dat testing set that contains observed outcomes and predicted outcomes (continuous data) or probabilities of predicted outcomes (categorical data)
+#' @param relation_dat testing set that contains observed outcomes and predicted outcomes (continuous data) or probabilities of predicted outcomes (categorical data)
 #' @param yobs name of the continuous observed outcome
 #' @param ypred name of the continuous predicted outcome
 #' @param valid_dat validation set that contains predicted outcomes and covariates
@@ -17,12 +17,21 @@
 #'
 #'
 #' @export
-postpi_der <- function(test_dat, yobs, ypred, valid_dat, inf_formula){
+#' @examples
+#' load("./data/RINdata.RData")
+#'
+#' testing    <- RINdata[1:2000,]
+#' validation <- RINdata[2001:nrow(RINdata),]
+#'
+#' relation_dat <- data.frame(actual = testing$actual, predictions = testing$predictions)
+#' inf_results  <- postpi_der(relation_dat, actual, predictions, validation, predictions ~ region_1)
+#'
+postpi_der <- function(relation_dat, yobs, ypred, valid_dat, inf_formula){
 
   obs  <- deparse(substitute(yobs))
   pred <- deparse(substitute(ypred))
 
-  if (is.numeric(test_dat[ , obs])){
+  if (is.numeric(relation_dat[, obs])){
 
     covariates      <- all.vars(inf_formula)[-1]
 
@@ -33,9 +42,9 @@ postpi_der <- function(test_dat, yobs, ypred, valid_dat, inf_formula){
     y_yp <- as.formula(paste0(obs, " ~ ", pred))
 
     ## calculate conditional variance of yp on testing set
-    gamma1   <- tidy(lm(y_yp, test_dat))$estimate[-1]
+    gamma1   <- tidy(lm(y_yp, relation_dat))$estimate[-1]
 
-    sigma_rel  <- sigma(lm(y_yp, test_dat))
+    sigma_rel  <- sigma(lm(y_yp, relation_dat))
 
     sigma_yp_x  <- sigma(lm(yp_x, valid_dat))
 

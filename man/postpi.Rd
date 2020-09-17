@@ -4,18 +4,21 @@
 \alias{postpi}
 \title{postpi function provides the corrected inference result table using a bootstrap approach for continuous / catigorical outcomes}
 \usage{
-postpi(valid_dat, rel_model, inf_formula, bs = 100, seed = 1234)
+postpi(valid_dat, rel_model, inf_formula, method = "par", bs = 100,
+  seed = 1234)
 }
 \arguments{
 \item{valid_dat}{validation set that contains predicted outcomes and covariates}
 
 \item{rel_model}{model object created by `postpi_relate()`}
 
-\item{inf_formula}{inference formula, eg. y ~ x1}
+\item{inf_formula}{inference formula for fitting predicted outcomes ~ covariates, eg. yp ~ x1}
+
+\item{method}{parametric or non-parametric method to estimate standard error of estimates. Method = "par" or "non-par". The default value is "par", parametric method.}
 
 \item{bs}{number of bootstrap times. The default value is 100 times.}
 
-\item{seed}{seed number}
+\item{seed}{seed number. The default value is 1234}
 }
 \value{
 tidytable a tidy table for inference results. It contains conlumns: term, estimate, std.error, statistic, p.value
@@ -25,4 +28,17 @@ This function is required to take in the relationship model from `postpi_relate(
 Through a bootstrap approach, the function quantifies biases using the relationship model
 and then corrects the inference results in the validation set based on the input inference formula.
 The default number of bootstrapping is 100 and the seed is 1234. Both parameters can be defined by users.
+}
+\examples{
+load("./data/RINdata.RData")
+
+testing    <- RINdata[1:2000,]
+validation <- RINdata[2001:nrow(RINdata),]
+
+relation_dat   <- data.frame(actual = testing$actual, predictions = testing$predictions)
+relation_model <- postpi_relate(relation_dat,actual)
+
+inf_par    <- postpi(validation, relation_model, predictions ~ region_1)
+inf_nonpar <- postpi(validation, relation_model, predictions ~ region_1, method = "non-par")
+
 }
