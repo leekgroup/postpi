@@ -18,20 +18,20 @@
 #'
 #' @export
 #' @examples
-#' load("./data/RINdata.RData")
+#' data(RINdata,package="postpi")
 #'
 #' testing    <- RINdata[1:2000,]
 #' validation <- RINdata[2001:nrow(RINdata),]
 #'
-#' relation_dat <- data.frame(actual = testing$actual, predictions = testing$predictions)
-#' inf_results  <- postpi_der(relation_dat, actual, predictions, validation, predictions ~ region_1)
+#' relation_dat <- data.frame(actual = testing$actual, pred = testing$predictions)
+#' inf_results  <- postpi_der(relation_dat, actual, pred, validation, predictions ~ region_1)
 #'
 postpi_der <- function(relation_dat, yobs, ypred, valid_dat, inf_formula){
 
   obs  <- deparse(substitute(yobs))
   pred <- deparse(substitute(ypred))
 
-  if (is.numeric(relation_dat[, obs])){
+  if (is.numeric(relation_dat[[obs]])){
 
     covariates      <- all.vars(inf_formula)[-1]
 
@@ -58,7 +58,7 @@ postpi_der <- function(relation_dat, yobs, ypred, valid_dat, inf_formula){
 
 
     ## derived adjusted beta
-    beta_yp_x <- tidy(lm(yp_x, valid_dat)) %>% pull(estimate)
+    beta_yp_x <- tidy(lm(yp_x, valid_dat)) %>% dplyr::pull(estimate)
     beta_yp_x <- beta_yp_x[-1]
 
     der_beta <- gamma1 * beta_yp_x
@@ -77,6 +77,8 @@ postpi_der <- function(relation_dat, yobs, ypred, valid_dat, inf_formula){
                              statistic = der_t,
                              p.value = der_p,
                              row.names = NULL)
+  }else{
+    stop("Analytical derivation is only available for continuous outcomes")
   }
 
 

@@ -4,14 +4,14 @@
 \alias{postpi_relate}
 \title{postpi_relate function models the the relationship between the observed and predicted outcomes.}
 \usage{
-postpi_relate(relation_dat, yobs, method = "knn")
+postpi_relate(relation_dat, yobs, method_categorical = "knn")
 }
 \arguments{
 \item{relation_dat}{testing set that contains observed outcomes and predicted outcomes (continuous data) or probabilities of predicted outcomes (categorical data)}
 
 \item{yobs}{name of the observed outcome in the testing set}
 
-\item{yobs}{name of the observed outcome in the testing set}
+\item{method_categorical}{Method to be passed to caret train function for categorical data}
 }
 \value{
 rel_model relationship model between observed outcomes and predicted outcomes/probabilities

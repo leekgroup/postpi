@@ -4,3 +4,6 @@
 .Ruserdata
 doc
 Meta
+postpi.Rcheck/
+postpi*.tar.gz
+postpi*.tgz

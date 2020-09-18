@@ -8,7 +8,7 @@
 #' @import broom
 #' @import matrixStats
 #'
-#' @param valid_dat validation set that contains predicted outcomes and covariates
+#' @param valid_dat validation set that contains only the predicted outcomes and covariates of interest
 #' @param rel_model model object created by `postpi_relate()`
 #' @param inf_formula inference formula for fitting predicted outcomes ~ covariates, eg. yp ~ x1
 #' @param method parametric or non-parametric method to estimate standard error of estimates. Method = "par" or "non-par". The default value is "par", parametric method.
@@ -19,7 +19,7 @@
 #'
 #' @export
 #' @examples
-#' load("./data/RINdata.RData")
+#' data(RINdata,package="postpi")
 #'
 #' testing    <- RINdata[1:2000,]
 #' validation <- RINdata[2001:nrow(RINdata),]
@@ -30,9 +30,9 @@
 #' inf_par    <- postpi(validation, relation_model, predictions ~ region_1)
 #' inf_nonpar <- postpi(validation, relation_model, predictions ~ region_1, method = "non-par")
 #'
-postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, seed = 1234){
+postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, seed = NULL){
 
-  set.seed(seed)
+  if(!is.null(seed)){set.seed(seed)}
 
   ## ss: sample size
   ss <- nrow(valid_dat)
@@ -49,7 +49,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, 
 
     bs_data <- valid_dat[bs_idx,]
 
-    if (is.numeric(valid_dat[, ypred])){
+    if (is.numeric(valid_dat[[ypred]])){
 
       sim_y           <- rnorm(ss, mean = predict(rel_model, bs_data), sd = sigma(rel_model))
 
@@ -160,7 +160,7 @@ postpi <- function(valid_dat, rel_model, inf_formula, method = "par", bs = 100, 
 
   tidytable$p.value   <- 2*pt(-abs(tidytable$statistic),df = ss -1 - length(covariates))
 
-
+  set.seed(Sys.time())
 
   tidytable
 

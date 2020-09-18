@@ -4,11 +4,17 @@
 \alias{postpi}
 \title{postpi function provides the corrected inference result table using a bootstrap approach for continuous / catigorical outcomes}
 \usage{
-postpi(valid_dat, rel_model, inf_formula, method = "par", bs = 100,
-  seed = 1234)
+postpi(
+  valid_dat,
+  rel_model,
+  inf_formula,
+  method = "par",
+  bs = 100,
+  seed = NULL
+)
 }
 \arguments{
-\item{valid_dat}{validation set that contains predicted outcomes and covariates}
+\item{valid_dat}{validation set that contains only the predicted outcomes and covariates of interest}
 
 \item{rel_model}{model object created by `postpi_relate()`}
 
