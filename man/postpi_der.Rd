@@ -26,12 +26,12 @@ The function relates continuous observed and predicted outcomes in the testing s
 and then corrects the inference results in the validation set based on the input inference formula
 }
 \examples{
-load("./data/RINdata.RData")
+data(RINdata,package="postpi")
 
 testing    <- RINdata[1:2000,]
 validation <- RINdata[2001:nrow(RINdata),]
 
-relation_dat <- data.frame(actual = testing$actual, predictions = testing$predictions)
-inf_results  <- postpi_der(relation_dat, actual, predictions, validation, predictions ~ region_1)
+relation_dat <- data.frame(actual = testing$actual, pred = testing$predictions)
+inf_results  <- postpi_der(relation_dat, actual, pred, validation, predictions ~ region_1)
 
 }

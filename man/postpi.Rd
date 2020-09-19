@@ -36,7 +36,7 @@ and then corrects the inference results in the validation set based on the input
 The default number of bootstrapping is 100 and the seed is 1234. Both parameters can be defined by users.
 }
 \examples{
-load("./data/RINdata.RData")
+data(RINdata,package="postpi")
 
 testing    <- RINdata[1:2000,]
 validation <- RINdata[2001:nrow(RINdata),]

@@ -23,7 +23,7 @@ For categorical outcomes, user inputs observed outcomes and the probabilities of
 It related categorical data through a user defined maching learning method from the caret package. The default method is k-nearest neighbours.
 }
 \examples{
-load("./data/RINdata.RData")
+data(RINdata,package="postpi")
 
 testing    <- RINdata[1:2000,]
 relation_dat   <- data.frame(actual = testing$actual, pred = testing$predictions)
