@@ -6,18 +6,12 @@ Description: postpi corrects statistical inferences performed directly on predic
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
-Imports:
-    gam,
-    caret,
-    broom,
-    matrixStats,
-    dplyr
-Suggests: 
-    knitr,
-    rmarkdown,
-    testthat
+RoxygenNote: 7.1.2
+Imports: gam, caret, broom, matrixStats, dplyr, survival, glmnet, mice
+Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
-Depends: 
-    magrittr,
-    R (>= 2.10)
+Depends: R (>= 3.5.0), magrittr
+NeedsCompilation: no
+Packaged: 2021-10-28 20:20:09 UTC; arjun.sondhi
+Author: Siruo Wang [cre, aut]
+Maintainer: Siruo Wang <swang171@jhu.edu>
