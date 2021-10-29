@@ -31,3 +31,24 @@
 #' @source \url{https://academic.oup.com/nar/article/46/9/e54/4920847}
 "TISSUEdata"
 
+
+#' Simulated EHR-derived data for covariate post-pi in survival analysis
+#'
+#' A dataset containing data for 2,000 patients with fully observed age at diagnosis,
+#' sex, survival time, and event indicator. Also contains predicted probability of
+#' metastatic disease, with true metastatic status available for first 1,000 patients.
+#'
+#' @format A list of two data frames (labeled and unlabeled) each with 1,000 rows and 6 or 7 variables:
+#' \describe{
+#'   \item{patientid}{Patient ID, integer}
+#'   \item{age_dx}{Age at diagnosis, numeric}
+#'   \item{sex}{Sex, binary}
+#'   \item{met_true}{True metastatic status, available for labeled data only}
+#'   \item{met_prob}{ML-predicted probability of metastatic status}
+#'   \item{time}{Observed event time, numeric}
+#'   \item{status}{Event indicator, 1 if event observed, 0 if censored}
+#' }
+#' 
+"EHRdata"
+
+
